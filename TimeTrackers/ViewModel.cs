@@ -83,7 +83,7 @@ namespace TimeTrackers {
 			IEnumerable<TimeTracker> tts = TimeTrackers.Where(t => !String.IsNullOrWhiteSpace(t.Notes));
 			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
 			for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
-				finals.Add(new DifferenceTimeTracker(node.Value, (node.Next?.Value?.Time ?? DateTime.Now) - node.Value.Time));
+				finals.Add(new DifferenceTimeTracker(node.Value, (node.Next?.Value?.Time.TimeOfDay ?? DateTime.Now.TimeOfDay) - node.Value.Time.TimeOfDay));
 			}
 
 			IEnumerable<IGrouping<string, DifferenceTimeTracker>> groupedFinals =
