@@ -7,8 +7,11 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance local:ViewModel}">
-    <Grid>
-        <TabControl Margin="6">
+    <DockPanel Margin="6">
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock Text="{Binding Message}" />
+        </StatusBar>
+        <TabControl DockPanel.Dock="Top">
             <TabItem Header="Notes">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Bottom">
@@ -23,9 +26,9 @@
                                         <ColumnDefinition Width="60" />
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <xctk:TimePicker Text="{Binding Time}" Height="20" VerticalAlignment="Top" />
+                                    <xctk:TimePicker Value="{Binding Time}" Height="20" VerticalAlignment="Top" />
                                     <TextBox Grid.Column="1" Text="{Binding Group}" Height="20" VerticalAlignment="Top" />
-                                    <TextBox Grid.Column="2" Text="{Binding Notes}" AcceptsReturn="True" AcceptsTab="True" />
+                                    <TextBox Grid.Column="2" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -68,6 +71,5 @@
                 </ItemsControl>
             </TabItem>
         </TabControl>
-
-    </Grid>
+    </DockPanel>
 </Window>

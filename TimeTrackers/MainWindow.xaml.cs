@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 
 namespace TimeTrackers {
 	/// <summary>
@@ -17,6 +18,10 @@ namespace TimeTrackers {
 
 		private void Finals_OnGotFocus(object sender, RoutedEventArgs e) {
 			ViewModel.Instance.CalculateFinals();
+		}
+
+		protected override void OnClosing(CancelEventArgs e) {
+			ViewModel.Instance.SaveTimers();
 		}
 	}
 }
