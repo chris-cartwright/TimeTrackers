@@ -34,6 +34,10 @@ namespace TimeTrackers {
 			public DateTime Time { get; set; }
 			public string Group { get; set; }
 			public string Notes { get; set; }
+
+			public TimeTracker() {
+				Time = DateTime.Now;
+			}
 		}
 
 		public class FinalTracker {
