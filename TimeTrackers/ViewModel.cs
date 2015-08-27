@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
-using System.Windows.Input;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
 using TimeTrackers.View.ViewModel;
@@ -94,6 +93,18 @@ namespace TimeTrackers {
 				select g;
 
 			foreach (IGrouping<string, DifferenceTimeTracker> tg in groupedFinals) {
+				if (String.IsNullOrWhiteSpace(tg.Key)) {
+					foreach (DifferenceTimeTracker tt in tg) {
+						FinalTrackers.Add(new FinalTracker() {
+							Time = tt.Difference,
+							Group = String.Empty,
+							Notes = tt.Notes
+						});
+					}
+
+					continue;
+				}
+
 				FinalTrackers.Add(new FinalTracker() {
 					Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
 					Group = tg.Key,
