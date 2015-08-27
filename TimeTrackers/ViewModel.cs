@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using System.Windows.Input;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
+using TimeTrackers.View.ViewModel;
 
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
@@ -45,9 +47,13 @@ namespace TimeTrackers {
 		public ObservableCollection<FinalTracker> FinalTrackers { get; }
 		public string Message { get; set; }
 
+		public RelayCommand RemoveCommand { get; }
+
 		private ViewModel() {
 			TimeTrackers = new ObservableCollection<TimeTracker>();
 			FinalTrackers = new ObservableCollection<FinalTracker>();
+
+			RemoveCommand = new RelayCommand(RemoveCommand_Execute);
 
 			if (File.Exists(AutosaveFile)) {
 				List<TimeTracker> tts = JsonConvert.DeserializeObject<List<TimeTracker>>(File.ReadAllText(AutosaveFile));
@@ -62,6 +68,10 @@ namespace TimeTrackers {
 			timer.Elapsed += Timer_Elapsed;
 			timer.AutoReset = true;
 			timer.Enabled = true;
+		}
+
+		private void RemoveCommand_Execute(object o) {
+			TimeTrackers.Remove(o as TimeTracker);
 		}
 
 		private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
