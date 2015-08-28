@@ -49,6 +49,7 @@ namespace TimeTrackers {
 		public ObservableCollection<TimeTracker> TimeTrackers { get; }
 		public ObservableCollection<FinalTracker> FinalTrackers { get; }
 		public string Message { get; set; }
+		public TimeSpan TotalTime { get; set; }
 
 		public RelayCommand RemoveCommand { get; }
 
@@ -83,6 +84,7 @@ namespace TimeTrackers {
 
 		public void CalculateFinals() {
 			FinalTrackers.Clear();
+			TotalTime = new TimeSpan();
 
 			IEnumerable<TimeTracker> tts = TimeTrackers.Where(t => !String.IsNullOrWhiteSpace(t.Notes));
 			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
@@ -115,6 +117,8 @@ namespace TimeTrackers {
 					Notes = String.Join(Environment.NewLine, tg.Select(t => t.Notes))
 				});
 			}
+
+			TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
 		}
 
 		public void SaveTimers() {

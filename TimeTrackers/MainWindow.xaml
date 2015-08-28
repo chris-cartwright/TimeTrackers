@@ -43,34 +43,47 @@
                 </DockPanel>
             </TabItem>
             <TabItem Header="Final" GotFocus="Finals_OnGotFocus">
-                <ItemsControl ItemsSource="{Binding FinalTrackers}" DockPanel.Dock="Top">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="60" />
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Height="20" VerticalAlignment="Top" IsReadOnly="True">
-                                    <TextBox.Text>
-                                        <MultiBinding StringFormat="{}{0}:{1}" Mode="OneWay">
-                                            <Binding Path="Time.Hours"/>
-                                            <Binding Path="Time.Minutes"/>
-                                        </MultiBinding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBox Grid.Column="1" Text="{Binding Group}" Height="20" VerticalAlignment="Top" />
-                                <TextBox Grid.Column="2" Text="{Binding Notes}" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top">
+                        <TextBlock Text="Total time: " />
+                        <TextBlock Margin="60,0,0,0">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}:{1}">
+                                    <Binding Path="TotalTime.Hours"/>
+                                    <Binding Path="TotalTime.Minutes"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding FinalTrackers}" DockPanel.Dock="Bottom">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Height="20" VerticalAlignment="Top" IsReadOnly="True">
+                                        <TextBox.Text>
+                                            <MultiBinding StringFormat="{}{0}:{1}" Mode="OneWay">
+                                                <Binding Path="Time.Hours"/>
+                                                <Binding Path="Time.Minutes"/>
+                                            </MultiBinding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                    <TextBox Grid.Column="1" Text="{Binding Group}" Height="20" VerticalAlignment="Top" IsReadOnly="True" />
+                                    <TextBox Grid.Column="2" Text="{Binding Notes}" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </DockPanel>
             </TabItem>
         </TabControl>
     </DockPanel>
