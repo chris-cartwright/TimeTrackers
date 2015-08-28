@@ -82,6 +82,18 @@ namespace TimeTrackers {
 			SaveTimers();
 		}
 
+		private TimeSpan? ToHourMinute(DateTime? dateTime) {
+			if (dateTime == null) {
+				return null;
+			}
+
+			return ToHourMinute((DateTime)dateTime);
+		}
+
+		private TimeSpan ToHourMinute(DateTime dateTime) {
+			return new TimeSpan(dateTime.TimeOfDay.Hours, dateTime.TimeOfDay.Minutes, 0);
+		}
+
 		public void CalculateFinals() {
 			FinalTrackers.Clear();
 			TotalTime = new TimeSpan();
@@ -89,7 +101,7 @@ namespace TimeTrackers {
 			IEnumerable<TimeTracker> tts = TimeTrackers.Where(t => !String.IsNullOrWhiteSpace(t.Notes));
 			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
 			for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
-				finals.Add(new DifferenceTimeTracker(node.Value, (node.Next?.Value?.Time.TimeOfDay ?? DateTime.Now.TimeOfDay) - node.Value.Time.TimeOfDay));
+				finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
 			}
 
 			IEnumerable<IGrouping<string, DifferenceTimeTracker>> groupedFinals =
