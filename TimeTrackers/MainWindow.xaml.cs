@@ -18,6 +18,11 @@ namespace TimeTrackers {
 			ViewModel.Instance.TimeTrackers.Add(new ViewModel.TimeTracker());
 		}
 
+		private void NewDay_OnClick(object sender, RoutedEventArgs e) {
+			ViewModel.Instance.TimeTrackers.Clear();
+			ViewModel.Instance.TimeTrackers.Add(new ViewModel.TimeTracker());
+		}
+
 		private void Finals_OnGotFocus(object sender, RoutedEventArgs e) {
 			ViewModel.Instance.CalculateFinals();
 		}
