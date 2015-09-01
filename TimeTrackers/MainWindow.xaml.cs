@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace TimeTrackers {
 	/// <summary>
@@ -33,6 +34,8 @@ namespace TimeTrackers {
 
 			// Magic line to highlight text: http://stackoverflow.com/a/7986906
 			e.Handled = true;
+
+			Clipboard.SetText(tb.Text);
 		}
 	}
 }
