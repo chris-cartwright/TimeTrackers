@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace TimeTrackers {
 	/// <summary>
@@ -22,6 +23,16 @@ namespace TimeTrackers {
 
 		protected override void OnClosing(CancelEventArgs e) {
 			ViewModel.Instance.SaveTimers();
+		}
+
+		private void FinalNotes_OnGotFocus(object sender, RoutedEventArgs e) {
+			TextBox tb = sender as TextBox;
+			if (tb == null) {
+				return;
+			}
+
+			// Magic line to highlight text: http://stackoverflow.com/a/7986906
+			e.Handled = true;
 		}
 	}
 }
