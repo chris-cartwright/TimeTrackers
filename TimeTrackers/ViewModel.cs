@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using LibGit2Sharp;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
 using TimeTrackers.View.ViewModel;
@@ -12,6 +13,7 @@ namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
 		public static string AutosaveFile { get; } = Path.Combine(Path.GetTempPath(), "TimeTrackers.autosave.json");
+		public static string[] GitPaths { get; } = { @"C:\_Development\OSCIDv4", @"C:\_Development\OSCIDv4_Utilities" };
 
 		public static ViewModel Instance { get; }
 
@@ -30,6 +32,7 @@ namespace TimeTrackers {
 			}
 		}
 
+		[NotifyPropertyChanged]
 		public class TimeTracker {
 			public DateTime Time { get; set; }
 			public string Group { get; set; }
@@ -52,12 +55,14 @@ namespace TimeTrackers {
 		public TimeSpan TotalTime { get; set; }
 
 		public RelayCommand RemoveCommand { get; }
+		public RelayCommand GitMessagesCommand { get; }
 
 		private ViewModel() {
 			TimeTrackers = new ObservableCollection<TimeTracker>();
 			FinalTrackers = new ObservableCollection<FinalTracker>();
 
 			RemoveCommand = new RelayCommand(RemoveCommand_Execute);
+			GitMessagesCommand = new RelayCommand(GitMessagesCommand_Execute);
 
 			if (File.Exists(AutosaveFile)) {
 				List<TimeTracker> tts = JsonConvert.DeserializeObject<List<TimeTracker>>(File.ReadAllText(AutosaveFile));
@@ -72,6 +77,23 @@ namespace TimeTrackers {
 			timer.Elapsed += Timer_Elapsed;
 			timer.AutoReset = true;
 			timer.Enabled = true;
+		}
+
+		private void GitMessagesCommand_Execute(object o) {
+			TimeTracker tt = o as TimeTracker;
+			if (tt == null) {
+				return;
+			}
+
+			DateTime start = tt.Time;
+			DateTime stop = TimeTrackers.SkipWhile(t => t != tt).Skip(1).FirstOrDefault()?.Time ?? DateTime.Now;
+			IEnumerable<string> messages =
+				from p in GitPaths
+				let g = new Repository(p)
+				from c in g.Commits.SkipWhile(c => c.Author.When > stop).TakeWhile(c => c.Author.When > start)
+				select $"- {c.Message}".Trim();
+
+			tt.Notes = $"{tt.Notes}{Environment.NewLine}{String.Join(Environment.NewLine, messages)}";
 		}
 
 		private void RemoveCommand_Execute(object o) {
