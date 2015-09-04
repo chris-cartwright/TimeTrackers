@@ -90,7 +90,10 @@ namespace TimeTrackers {
 			IEnumerable<string> messages =
 				from p in GitPaths
 				let g = new Repository(p)
-				from c in g.Commits.SkipWhile(c => c.Author.When > stop).TakeWhile(c => c.Author.When > start)
+				from c in g.Commits
+					.SkipWhile(c => c.Author.When > stop)
+					.TakeWhile(c => c.Author.When > start)
+				where c.Author.Email == "chris.cartwright@dei.ca"
 				select $"- {c.Message}".Trim();
 
 			List<string> notes = new List<string>((tt.Notes ?? String.Empty).Split('\r', '\n'));
