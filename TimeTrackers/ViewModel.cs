@@ -93,7 +93,7 @@ namespace TimeTrackers {
 				from c in g.Commits.SkipWhile(c => c.Author.When > stop).TakeWhile(c => c.Author.When > start)
 				select $"- {c.Message}".Trim();
 
-			tt.Notes = $"{tt.Notes}{Environment.NewLine}{String.Join(Environment.NewLine, messages)}";
+			tt.Notes = $"{tt.Notes}{Environment.NewLine}{String.Join(Environment.NewLine, messages)}".Trim();
 		}
 
 		private void RemoveCommand_Execute(object o) {
