@@ -7,13 +7,13 @@ using System.Timers;
 using LibGit2Sharp;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
+using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
 		public static string AutosaveFile { get; } = Path.Combine(Path.GetTempPath(), "TimeTrackers.autosave.json");
-		public static string[] GitPaths { get; } = { @"C:\_Development\OSCIDv4", @"C:\_Development\OSCIDv4_Utilities" };
 
 		public static ViewModel Instance { get; }
 
@@ -88,12 +88,12 @@ namespace TimeTrackers {
 			DateTime start = tt.Time;
 			DateTime stop = TimeTrackers.SkipWhile(t => t != tt).Skip(1).FirstOrDefault()?.Time ?? DateTime.Now;
 			IEnumerable<string> messages =
-				from p in GitPaths
+				from p in Settings.Default.GitPaths
 				let g = new Repository(p)
 				from c in g.Commits
 					.SkipWhile(c => c.Author.When > stop)
 					.TakeWhile(c => c.Author.When > start)
-				where c.Author.Email == "chris.cartwright@dei.ca"
+				where c.Author.Email == Settings.Default.AuthorEmail
 				select $"- {c.Message}".Trim();
 
 			List<string> notes = new List<string>((tt.Notes ?? String.Empty).Split('\r', '\n'));
