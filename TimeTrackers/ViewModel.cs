@@ -140,20 +140,6 @@ namespace TimeTrackers {
 				select g;
 
 			foreach (IGrouping<string, DifferenceTimeTracker> tg in groupedFinals) {
-				// TODO Get rid of the following if. It's messing up time tracking
-				// TODO Demonstrated on - Compacted Investigation Status label from Sept 4th
-				if (String.IsNullOrWhiteSpace(tg.Key)) {
-					foreach (DifferenceTimeTracker tt in tg) {
-						FinalTrackers.Add(new FinalTracker() {
-							Time = tt.Difference,
-							Group = String.Empty,
-							Notes = tt.Notes
-						});
-					}
-
-					continue;
-				}
-
 				FinalTrackers.Add(new FinalTracker() {
 					Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
 					Group = tg.Key,
