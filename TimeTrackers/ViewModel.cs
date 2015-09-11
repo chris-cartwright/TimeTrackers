@@ -10,6 +10,8 @@ using PostSharp.Patterns.Model;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
+// TODO Add a history option to load the last x days
+// TODO Add checkboxes for EOD and lunch
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
@@ -138,6 +140,8 @@ namespace TimeTrackers {
 				select g;
 
 			foreach (IGrouping<string, DifferenceTimeTracker> tg in groupedFinals) {
+				// TODO Get rid of the following if. It's messing up time tracking
+				// TODO Demonstrated on - Compacted Investigation Status label from Sept 4th
 				if (String.IsNullOrWhiteSpace(tg.Key)) {
 					foreach (DifferenceTimeTracker tt in tg) {
 						FinalTrackers.Add(new FinalTracker() {
