@@ -177,8 +177,7 @@ namespace TimeTrackers {
 			TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
 		}
 
-		public void SaveTimers()
-		{
+		public void SaveTimers() {
 			DateTime[] toRemove = (
 					from tt in TimeTrackersByDay.Cast<TimeTracker>()
 					group tt by tt.Time.Date into g
