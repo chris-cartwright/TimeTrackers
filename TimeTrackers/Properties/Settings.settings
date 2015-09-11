@@ -12,5 +12,8 @@
   &lt;string&gt;C:\_Development\OSCIDv4_Utilities&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
+    <Setting Name="DaysToKeep" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using System.Windows.Data;
 using LibGit2Sharp;
 using Newtonsoft.Json;
+using PostSharp;
 using PostSharp.Patterns.Model;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
-// TODO Add a history option to load the last x days
+// TODO Add option to select which day (date) to view
 // TODO Add checkboxes for EOD and lunch
+// TODO Move saved time trackers location out of %temp% so CCleaner doesn't remove it
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
@@ -53,15 +57,38 @@ namespace TimeTrackers {
 
 		public ObservableCollection<TimeTracker> TimeTrackers { get; }
 		public ObservableCollection<FinalTracker> FinalTrackers { get; }
+		public ICollectionView TimeTrackersByDay { get; }
 		public string Message { get; set; }
 		public TimeSpan TotalTime { get; set; }
+		public DateTime FilterDay { get; set; }
 
 		public RelayCommand RemoveCommand { get; }
 		public RelayCommand GitMessagesCommand { get; }
 
+		private bool FilterByDay(object obj) {
+			TimeTracker tt = obj as TimeTracker;
+			if (tt == null) {
+				throw new ArgumentException("Object is not a time tracker", nameof(obj));
+			}
+
+			return tt.Time.Date == FilterDay.Date;
+		}
+
 		private ViewModel() {
 			TimeTrackers = new ObservableCollection<TimeTracker>();
 			FinalTrackers = new ObservableCollection<FinalTracker>();
+			FilterDay = DateTime.Now;
+
+			TimeTrackersByDay = CollectionViewSource.GetDefaultView(TimeTrackers);
+			TimeTrackersByDay.Filter = FilterByDay;
+			INotifyPropertyChanged propChanged = Post.Cast<ViewModel, INotifyPropertyChanged>(this);
+			propChanged.PropertyChanged += (src, args) => {
+				if (args.PropertyName != nameof(FilterDay)) {
+					return;
+				}
+
+				TimeTrackersByDay.Refresh();
+			};
 
 			RemoveCommand = new RelayCommand(RemoveCommand_Execute);
 			GitMessagesCommand = new RelayCommand(GitMessagesCommand_Execute);
@@ -127,7 +154,7 @@ namespace TimeTrackers {
 			FinalTrackers.Clear();
 			TotalTime = new TimeSpan();
 
-			IEnumerable<TimeTracker> tts = TimeTrackers.Where(t => !String.IsNullOrWhiteSpace(t.Notes));
+			IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.Notes));
 			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
 			for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
 				finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
@@ -150,8 +177,23 @@ namespace TimeTrackers {
 			TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
 		}
 
-		public void SaveTimers() {
-			File.WriteAllText(AutosaveFile, JsonConvert.SerializeObject(TimeTrackers));
+		public void SaveTimers()
+		{
+			DateTime[] toRemove = (
+					from tt in TimeTrackersByDay.Cast<TimeTracker>()
+					group tt by tt.Time.Date into g
+					orderby g
+					select g.Key.Date
+				)
+				.Skip(Settings.Default.DaysToKeep)
+				.ToArray();
+
+			IEnumerable<TimeTracker> toSave =
+				from tt in TimeTrackers
+				where !toRemove.Contains(tt.Time.Date)
+				select tt;
+
+			File.WriteAllText(AutosaveFile, JsonConvert.SerializeObject(toSave));
 			Message = $"Timers saved to cache at {DateTime.Now}";
 		}
 	}

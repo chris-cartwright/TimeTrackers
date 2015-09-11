@@ -16,9 +16,8 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Bottom">
                         <Button Content="Add" Click="Add_OnClick" />
-                        <Button Content="New Day" Click="NewDay_OnClick" />
                     </StackPanel>
-                    <ItemsControl ItemsSource="{Binding TimeTrackers}" DockPanel.Dock="Top">
+                    <ItemsControl ItemsSource="{Binding TimeTrackersByDay}" DockPanel.Dock="Top">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>

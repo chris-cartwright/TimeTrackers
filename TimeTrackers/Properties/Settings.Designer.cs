@@ -50,5 +50,17 @@ namespace TimeTrackers.Properties {
                 this["GitPaths"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int DaysToKeep {
+            get {
+                return ((int)(this["DaysToKeep"]));
+            }
+            set {
+                this["DaysToKeep"] = value;
+            }
+        }
     }
 }
