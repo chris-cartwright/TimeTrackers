@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TimeTrackers"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance local:ViewModel}">
     <DockPanel Margin="6">
@@ -14,6 +15,12 @@
         <TabControl DockPanel.Dock="Top">
             <TabItem Header="Notes">
                 <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <DatePicker
+                            SelectedDate="{Binding FilterDay}"
+                            DisplayDateStart="{Binding SmallestSaved}"
+                            DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" />
+                    </StackPanel>
                     <StackPanel DockPanel.Dock="Bottom">
                         <Button Content="Add" Click="Add_OnClick" />
                     </StackPanel>

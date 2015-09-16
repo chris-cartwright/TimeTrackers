@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using System.Windows;
 using System.Windows.Data;
 using LibGit2Sharp;
 using Newtonsoft.Json;
@@ -13,9 +14,9 @@ using PostSharp.Patterns.Model;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
-// TODO Add option to select which day (date) to view
 // TODO Add checkboxes for EOD and lunch
 // TODO Move saved time trackers location out of %temp% so CCleaner doesn't remove it
+// TODO Math error on Sept 11 2015
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
@@ -61,6 +62,7 @@ namespace TimeTrackers {
 		public string Message { get; set; }
 		public TimeSpan TotalTime { get; set; }
 		public DateTime FilterDay { get; set; }
+		public DateTime SmallestSaved { get; set; }
 
 		public RelayCommand RemoveCommand { get; }
 		public RelayCommand GitMessagesCommand { get; }
@@ -83,11 +85,9 @@ namespace TimeTrackers {
 			TimeTrackersByDay.Filter = FilterByDay;
 			INotifyPropertyChanged propChanged = Post.Cast<ViewModel, INotifyPropertyChanged>(this);
 			propChanged.PropertyChanged += (src, args) => {
-				if (args.PropertyName != nameof(FilterDay)) {
-					return;
+				if (args.PropertyName == nameof(FilterDay)) {
+					Application.Current.Dispatcher.Invoke(TimeTrackersByDay.Refresh);
 				}
-
-				TimeTrackersByDay.Refresh();
 			};
 
 			RemoveCommand = new RelayCommand(RemoveCommand_Execute);
@@ -101,6 +101,12 @@ namespace TimeTrackers {
 
 				Message = "Timers loaded from cache";
 			}
+
+			SetSmallest();
+
+			TimeTrackers.CollectionChanged += (src, args) => {
+				Application.Current.Dispatcher.Invoke(SetSmallest);
+			};
 
 			Timer timer = new Timer(30000);
 			timer.Elapsed += Timer_Elapsed;
@@ -148,6 +154,10 @@ namespace TimeTrackers {
 
 		private TimeSpan ToHourMinute(DateTime dateTime) {
 			return new TimeSpan(dateTime.TimeOfDay.Hours, dateTime.TimeOfDay.Minutes, 0);
+		}
+
+		private void SetSmallest() {
+			SmallestSaved = (from tt in TimeTrackers let d = tt.Time orderby tt.Time select d).FirstOrDefault();
 		}
 
 		public void CalculateFinals() {
