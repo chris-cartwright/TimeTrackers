@@ -15,12 +15,11 @@ using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
 // TODO Add checkboxes for EOD and lunch
-// TODO Move saved time trackers location out of %temp% so CCleaner doesn't remove it
 // TODO Math error on Sept 11 2015
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
-		public static string AutosaveFile { get; } = Path.Combine(Path.GetTempPath(), "TimeTrackers.autosave.json");
+		public static string AutosaveFile { get; } = Path.Combine(Directory.GetCurrentDirectory(), "TimeTrackers.autosave.json");
 
 		public static ViewModel Instance { get; }
 
