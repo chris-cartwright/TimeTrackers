@@ -16,6 +16,7 @@ using TimeTrackers.View.ViewModel;
 
 // TODO Add checkboxes for EOD and lunch
 // TODO Math error on Sept 11 2015
+// TODO Skip merges in git messages
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
@@ -35,17 +36,26 @@ namespace TimeTrackers {
 				Time = tt.Time;
 				Group = tt.Group;
 				Notes = tt.Notes;
+				Type = tt.Type;
 			}
 		}
+
+		public enum TimeTrackerType {
+			Normal,
+			Lunch,
+			EndOfDay
+		};
 
 		[NotifyPropertyChanged]
 		public class TimeTracker {
 			public DateTime Time { get; set; }
 			public string Group { get; set; }
 			public string Notes { get; set; }
+			public TimeTrackerType Type { get; set; }
 
 			public TimeTracker() {
 				Time = DateTime.Now;
+				Type = TimeTrackerType.Normal;
 			}
 		}
 
@@ -166,11 +176,17 @@ namespace TimeTrackers {
 			IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.Notes));
 			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
 			for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
+				// Stop processing on the EOD time tracker
+				if (node.Value.Type == TimeTrackerType.EndOfDay) {
+					break;
+				}
+
 				finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
 			}
 
 			IEnumerable<IGrouping<string, DifferenceTimeTracker>> groupedFinals =
 				from f in finals
+				where f.Type != TimeTrackerType.Lunch
 				group f by f.Group
 				into g
 				select g;

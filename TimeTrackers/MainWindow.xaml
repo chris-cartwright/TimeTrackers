@@ -8,6 +8,15 @@
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance local:ViewModel}">
+    <Window.Resources>
+        <ObjectDataProvider MethodName="GetValues"
+                    ObjectType="{x:Type System:Enum}"
+                    x:Key="TimeTrackerTypeProvider">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:ViewModel+TimeTrackerType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <DockPanel Margin="6">
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="{Binding Message}" />
@@ -30,16 +39,18 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="60" />
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="30"/>
                                         <ColumnDefinition Width="30"/>
                                     </Grid.ColumnDefinitions>
-                                    <xctk:TimePicker Value="{Binding Time}" Height="20" VerticalAlignment="Top" />
-                                    <TextBox Grid.Column="1" Text="{Binding Group}" Height="20" VerticalAlignment="Top" />
-                                    <TextBox Grid.Column="2" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
-                                    <Button Grid.Column="3" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
-                                    <Button Grid.Column="4" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
+                                    <xctk:TimePicker Value="{Binding Time}" />
+                                    <ComboBox Grid.Column="1" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
+                                    <TextBox Grid.Column="2" Text="{Binding Group}" />
+                                    <TextBox Grid.Column="3" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                    <Button Grid.Column="4" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
+                                    <Button Grid.Column="5" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -57,7 +68,7 @@
                         <TextBlock Text="Total time: " />
                         <TextBlock Margin="60,0,0,0">
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}:{1}">
+                                <MultiBinding StringFormat="{}{0}:{1}" Mode="OneWay">
                                     <Binding Path="TotalTime.Hours"/>
                                     <Binding Path="TotalTime.Minutes"/>
                                 </MultiBinding>
