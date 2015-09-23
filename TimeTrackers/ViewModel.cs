@@ -14,9 +14,6 @@ using PostSharp.Patterns.Model;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
-// TODO Add checkboxes for EOD and lunch
-// TODO Math error on Sept 11 2015
-// TODO Skip merges in git messages
 namespace TimeTrackers {
 	[NotifyPropertyChanged]
 	public class ViewModel {
@@ -138,6 +135,7 @@ namespace TimeTrackers {
 					.SkipWhile(c => c.Author.When > stop)
 					.TakeWhile(c => c.Author.When > start)
 				where c.Author.Email == Settings.Default.AuthorEmail
+				where c.Parents.Count() == 1
 				select $"- {c.Message}".Trim();
 
 			List<string> notes = new List<string>((tt.Notes ?? String.Empty).Split('\r', '\n'));
