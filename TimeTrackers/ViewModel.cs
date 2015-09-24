@@ -131,7 +131,7 @@ namespace TimeTrackers {
 			IEnumerable<string> messages =
 				from p in Settings.Default.GitPaths
 				let g = new Repository(p)
-				from c in g.Commits
+				from c in g.Commits.QueryBy(new CommitFilter() { Since = g.Refs, SortBy = CommitSortStrategies.Time })
 					.SkipWhile(c => c.Author.When > stop)
 					.TakeWhile(c => c.Author.When > start)
 				where c.Author.Email == Settings.Default.AuthorEmail
