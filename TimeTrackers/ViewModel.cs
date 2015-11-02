@@ -44,7 +44,7 @@ namespace TimeTrackers {
 		};
 
 		[NotifyPropertyChanged]
-		public class TimeTracker {
+		public class TimeTracker : IComparable<TimeTracker> {
 			public DateTime Time { get; set; }
 			public string Group { get; set; }
 			public string Notes { get; set; }
@@ -53,6 +53,10 @@ namespace TimeTrackers {
 			public TimeTracker() {
 				Time = DateTime.Now;
 				Type = TimeTrackerType.Normal;
+			}
+
+			public int CompareTo(TimeTracker other) {
+				return Comparer<DateTime>.Default.Compare(Time, other.Time);
 			}
 		}
 

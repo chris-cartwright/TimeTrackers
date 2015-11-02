@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace TimeTrackers {
 	/// <summary>
@@ -14,7 +13,7 @@ namespace TimeTrackers {
 			DataContext = ViewModel.Instance;
 		}
 
-		private void Add_OnClick(object sender, RoutedEventArgs e) {
+		private void Add_Click(object sender, RoutedEventArgs e) {
 			ViewModel.Instance.TimeTrackers.Add(new ViewModel.TimeTracker());
 		}
 
@@ -36,6 +35,11 @@ namespace TimeTrackers {
 			e.Handled = true;
 
 			Clipboard.SetText(tb.Text);
+		}
+
+		private void Arrange_Click(object sender, RoutedEventArgs e)
+		{
+			ViewModel.Instance.TimeTrackers.BubbleSort();
 		}
 	}
 }

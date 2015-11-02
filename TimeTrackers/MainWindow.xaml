@@ -31,7 +31,8 @@
                             DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Bottom">
-                        <Button Content="Add" Click="Add_OnClick" />
+                        <Button Content="Add" Click="Add_Click" />
+                        <Button Content="Arrange" Click="Arrange_Click" />
                     </StackPanel>
                     <ItemsControl ItemsSource="{Binding TimeTrackersByDay}" DockPanel.Dock="Top">
                         <ItemsControl.ItemTemplate>
