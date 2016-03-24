@@ -115,6 +115,10 @@ namespace TimeTrackers {
                 Message = "Timers loaded from cache";
             }
 
+            if (TimeTrackers.All(t => t.Time.Date != DateTime.Now.Date)) {
+                TimeTrackers.Add(new TimeTracker());
+            }
+
             SetSmallest();
 
             TimeTrackers.CollectionChanged += (src, args) => {
