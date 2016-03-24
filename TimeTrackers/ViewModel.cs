@@ -52,7 +52,7 @@ namespace TimeTrackers {
             public TimeTrackerType Type { get; set; }
 
             public TimeTracker() {
-                Time = DateTime.Now;
+                Time = Helpers.RoundToNearestInterval(DateTime.Now, new TimeSpan(0, 15, 0));
                 Type = TimeTrackerType.Normal;
             }
 
