@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance local:ViewModel}">
+        Title="MainWindow" Height="768" Width="1024" d:DataContext="{d:DesignInstance local:ViewModel}">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues"
                     ObjectType="{x:Type System:Enum}"
