@@ -66,6 +66,12 @@
             <TabItem Header="Final" GotFocus="Finals_OnGotFocus">
                 <DockPanel>
                     <Grid DockPanel.Dock="Top">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Selected Date: " />
+                                <TextBlock Text="{Binding FilterDay, StringFormat={}{0:MM/dd/yyyy}}" />
+                            </StackPanel>
+                            <Grid>
                         <TextBlock Text="Total time: " />
                         <TextBlock Margin="60,0,0,0">
                             <TextBlock.Text>
@@ -74,7 +80,9 @@
                                     <Binding Path="TotalTime.Minutes"/>
                                 </MultiBinding>
                             </TextBlock.Text>
-                        </TextBlock>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
                     </Grid>
                     <ItemsControl ItemsSource="{Binding FinalTrackers}" DockPanel.Dock="Bottom">
                         <ItemsControl.ItemTemplate>
