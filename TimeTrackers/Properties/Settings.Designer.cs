@@ -37,10 +37,25 @@ namespace TimeTrackers.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int DaysToKeep {
+            get {
+                return ((int)(this["DaysToKeep"]));
+            }
+            set {
+                this["DaysToKeep"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <string>C:\_Development\OSCIDv4</string>
+  <string>C:\_Development\OSCIDv4_UL</string>
   <string>C:\_Development\OSCIDv4_Utilities</string>
+  <string>C:\_Development\OSCIDv4_master</string>
+  <string>C:\_Development\OSCIDv4_Utilities_master</string>
 </ArrayOfString>")]
         public string[] GitPaths {
             get {
@@ -53,13 +68,13 @@ namespace TimeTrackers.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
-        public int DaysToKeep {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowEntryDate {
             get {
-                return ((int)(this["DaysToKeep"]));
+                return ((bool)(this["ShowEntryDate"]));
             }
             set {
-                this["DaysToKeep"] = value;
+                this["ShowEntryDate"] = value;
             }
         }
     }

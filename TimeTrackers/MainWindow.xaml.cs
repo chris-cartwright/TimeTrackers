@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using TimeTrackers.Properties;
 
 namespace TimeTrackers {
 	/// <summary>
@@ -23,6 +24,7 @@ namespace TimeTrackers {
 
 		protected override void OnClosing(CancelEventArgs e) {
 			ViewModel.Instance.SaveTimers();
+		    Settings.Default.Save();
 		}
 
 		private void FinalNotes_OnGotFocus(object sender, RoutedEventArgs e) {

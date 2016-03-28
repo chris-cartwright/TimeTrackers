@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:TimeTrackers"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:properties="clr-namespace:TimeTrackers.Properties"
         mc:Ignorable="d"
         Title="MainWindow" Height="768" Width="1024" d:DataContext="{d:DesignInstance local:ViewModel}">
     <Window.Resources>
@@ -16,6 +17,7 @@
                 <x:Type TypeName="local:ViewModel+TimeTrackerType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
     <DockPanel Margin="6">
         <StatusBar DockPanel.Dock="Bottom">
@@ -37,22 +39,15 @@
                     <ItemsControl ItemsSource="{Binding TimeTrackersByDay}" DockPanel.Dock="Top">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="80" />
-                                        <ColumnDefinition Width="60" />
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="30"/>
-                                        <ColumnDefinition Width="30"/>
-                                    </Grid.ColumnDefinitions>
-                                    <xctk:TimePicker Value="{Binding Time}" />
-                                    <ComboBox Grid.Column="1" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
-                                    <TextBox Grid.Column="2" Text="{Binding Group}" />
-                                    <TextBox Grid.Column="3" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
-                                    <Button Grid.Column="4" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
-                                    <Button Grid.Column="5" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
-                                </Grid>
+                                <DockPanel LastChildFill="True">
+                                    <xctk:TimePicker Width="100px" DockPanel.Dock="Left" Value="{Binding Time}" />
+                                    <DatePicker Width="100px" DockPanel.Dock="Left" SelectedDate="{Binding Time}" DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" Visibility="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate, Converter={StaticResource BoolToVis}}" />
+                                    <ComboBox Width="90px" DockPanel.Dock="Left" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
+                                    <TextBox Width="60px" DockPanel.Dock="Left" Text="{Binding Group}" />
+                                    <Button Width="30px" DockPanel.Dock="Right" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
+                                    <Button Width="30px" DockPanel.Dock="Right" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
+                                    <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                         <ItemsControl.ItemsPanel>
@@ -113,6 +108,11 @@
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
                 </DockPanel>
+            </TabItem>
+            <TabItem Header="Options">
+                <Grid>
+                    <CheckBox Content="Show date for entries" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate}" />
+                </Grid>
             </TabItem>
         </TabControl>
     </DockPanel>
