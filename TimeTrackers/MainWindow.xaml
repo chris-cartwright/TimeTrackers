@@ -44,8 +44,8 @@
                                     <DatePicker Width="100px" DockPanel.Dock="Left" SelectedDate="{Binding Time}" DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" Visibility="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate, Converter={StaticResource BoolToVis}}" />
                                     <ComboBox Width="90px" DockPanel.Dock="Left" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
                                     <TextBox Width="60px" DockPanel.Dock="Left" Text="{Binding Group}" />
-                                    <Button Width="30px" DockPanel.Dock="Right" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
                                     <Button Width="30px" DockPanel.Dock="Right" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
+                                    <Button Width="30px" DockPanel.Dock="Right" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
                                     <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
                                 </DockPanel>
                             </DataTemplate>
