@@ -49,17 +49,9 @@ namespace TimeTrackers.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <string>C:\_Development\OSCIDv4</string>
-  <string>C:\_Development\OSCIDv4_UL</string>
-  <string>C:\_Development\OSCIDv4_Utilities</string>
-  <string>C:\_Development\OSCIDv4_master</string>
-  <string>C:\_Development\OSCIDv4_Utilities_master</string>
-</ArrayOfString>")]
-        public string[] GitPaths {
+        public global::System.Collections.ObjectModel.ObservableCollection<Watchable<string>> GitPaths {
             get {
-                return ((string[])(this["GitPaths"]));
+                return ((global::System.Collections.ObjectModel.ObservableCollection<Watchable<string>>)(this["GitPaths"]));
             }
             set {
                 this["GitPaths"] = value;

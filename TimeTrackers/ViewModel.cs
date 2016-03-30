@@ -164,7 +164,15 @@ namespace TimeTrackers {
         }
 
         private void RemoveCommand_Execute(object o) {
-            TimeTrackers.Remove(o as TimeTracker);
+            TimeTracker tt = o as TimeTracker;
+            if (tt != null) {
+                TimeTrackers.Remove(tt);
+            }
+
+            Watchable<string> gp = o as Watchable<string>;
+            if (gp != null) {
+                Settings.Default.GitPaths.Remove(gp);
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e) {

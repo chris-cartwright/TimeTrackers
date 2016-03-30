@@ -8,15 +8,8 @@
     <Setting Name="DaysToKeep" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5</Value>
     </Setting>
-    <Setting Name="GitPaths" Type="System.String[]" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;C:\_Development\OSCIDv4&lt;/string&gt;
-  &lt;string&gt;C:\_Development\OSCIDv4_UL&lt;/string&gt;
-  &lt;string&gt;C:\_Development\OSCIDv4_Utilities&lt;/string&gt;
-  &lt;string&gt;C:\_Development\OSCIDv4_master&lt;/string&gt;
-  &lt;string&gt;C:\_Development\OSCIDv4_Utilities_master&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
+    <Setting Name="GitPaths" Type="System.Collections.ObjectModel.ObservableCollection&lt;Watchable&lt;string&gt;&gt;" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ShowEntryDate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

@@ -106,6 +106,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Settings.cs" />
+    <Compile Include="Watchable.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -148,6 +150,7 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>

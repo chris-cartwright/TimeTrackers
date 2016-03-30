@@ -33,7 +33,7 @@
                             DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Bottom">
-                        <Button Content="Add" Click="Add_Click" />
+                        <Button Content="Add" Click="AddTimeTracker_Click" />
                         <Button Content="Arrange" Click="Arrange_Click" />
                     </StackPanel>
                     <ItemsControl ItemsSource="{Binding TimeTrackersByDay}" DockPanel.Dock="Top">
@@ -67,14 +67,14 @@
                                 <TextBlock Text="{Binding FilterDay, StringFormat={}{0:MM/dd/yyyy}}" />
                             </StackPanel>
                             <Grid>
-                        <TextBlock Text="Total time: " />
-                        <TextBlock Margin="60,0,0,0">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}:{1}" Mode="OneWay">
-                                    <Binding Path="TotalTime.Hours"/>
-                                    <Binding Path="TotalTime.Minutes"/>
-                                </MultiBinding>
-                            </TextBlock.Text>
+                                <TextBlock Text="Total time: " />
+                                <TextBlock Margin="60,0,0,0">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}:{1}" Mode="OneWay">
+                                            <Binding Path="TotalTime.Hours"/>
+                                            <Binding Path="TotalTime.Minutes"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
                                 </TextBlock>
                             </Grid>
                         </StackPanel>
@@ -110,9 +110,34 @@
                 </DockPanel>
             </TabItem>
             <TabItem Header="Options">
-                <Grid>
+                <StackPanel>
                     <CheckBox Content="Show date for entries" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate}" />
-                </Grid>
+                    <GroupBox Header="git Paths">
+                        <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Bottom" Content="Add" Margin="0,3,0,0" Click="AddGitPath_Click" />
+                            <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Source={x:Static properties:Settings.Default}, Path=GitPaths}">
+                                <ItemsControl.Resources>
+                                    <Style TargetType="{x:Type TextBox}">
+                                        <Setter Property="Margin" Value="0,3,0,0"/>
+                                    </Style>
+                                </ItemsControl.Resources>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True">
+                                            <Button DockPanel.Dock="Right" Width="30px"  Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
+                                            <TextBox DockPanel.Dock="Left" Text="{Binding Value}" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </DockPanel>
+                    </GroupBox>
+                </StackPanel>
             </TabItem>
         </TabControl>
     </DockPanel>
