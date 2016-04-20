@@ -35,6 +35,7 @@
                     <StackPanel DockPanel.Dock="Bottom">
                         <Button Content="Add" Click="AddTimeTracker_Click" />
                         <Button Content="Arrange" Click="Arrange_Click" />
+                        <Button Content="Get git messages" Click="GetGitMessages_Click" />
                     </StackPanel>
                     <ItemsControl ItemsSource="{Binding TimeTrackersByDay}" DockPanel.Dock="Top">
                         <ItemsControl.ItemTemplate>
@@ -45,8 +46,14 @@
                                     <ComboBox Width="90px" DockPanel.Dock="Left" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
                                     <TextBox Width="60px" DockPanel.Dock="Left" Text="{Binding Group}" />
                                     <Button Width="30px" DockPanel.Dock="Right" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
-                                    <Button Width="30px" DockPanel.Dock="Right" Content="git" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.GitMessagesCommand}" CommandParameter="{Binding}" />
-                                    <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="400px" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" Text="{Binding UserNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                        <TextBox Grid.Column="1" Text="{Binding GitNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                    </Grid>
                                 </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

@@ -7,8 +7,6 @@ using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Data;
-using log4net;
-using LibGit2Sharp;
 using Newtonsoft.Json;
 using PostSharp;
 using PostSharp.Patterns.Model;
@@ -33,7 +31,8 @@ namespace TimeTrackers {
                 Difference = difference;
                 Time = tt.Time;
                 Group = tt.Group;
-                Notes = tt.Notes;
+                UserNotes = tt.UserNotes;
+                GitNotes = tt.GitNotes;
                 Type = tt.Type;
             }
         }
@@ -48,8 +47,13 @@ namespace TimeTrackers {
         public class TimeTracker : IComparable<TimeTracker> {
             public DateTime Time { get; set; }
             public string Group { get; set; }
-            public string Notes { get; set; }
+            public string UserNotes { get; set; }
+            public string GitNotes { get; set; }
             public TimeTrackerType Type { get; set; }
+
+            [JsonIgnore]
+            [SafeForDependencyAnalysis]
+            public string AllNotes => (UserNotes + Environment.NewLine + GitNotes).Trim();
 
             public TimeTracker() {
                 Time = Helpers.RoundToNearestInterval(DateTime.Now, new TimeSpan(0, 15, 0));
@@ -67,8 +71,6 @@ namespace TimeTrackers {
             public string Notes { get; set; }
         }
 
-        private readonly ILog _logger = LogManager.GetLogger(typeof(ViewModel));
-
         public ObservableCollection<TimeTracker> TimeTrackers { get; }
         public ObservableCollection<FinalTracker> FinalTrackers { get; }
         public ICollectionView TimeTrackersByDay { get; }
@@ -78,7 +80,6 @@ namespace TimeTrackers {
         public DateTime SmallestSaved { get; set; }
 
         public RelayCommand RemoveCommand { get; }
-        public RelayCommand GitMessagesCommand { get; }
 
         private bool FilterByDay(object obj) {
             TimeTracker tt = obj as TimeTracker;
@@ -104,7 +105,6 @@ namespace TimeTrackers {
             };
 
             RemoveCommand = new RelayCommand(RemoveCommand_Execute);
-            GitMessagesCommand = new RelayCommand(GitMessagesCommand_Execute);
 
             if (File.Exists(AutosaveFile)) {
                 List<TimeTracker> tts = JsonConvert.DeserializeObject<List<TimeTracker>>(File.ReadAllText(AutosaveFile));
@@ -129,38 +129,6 @@ namespace TimeTrackers {
             timer.Elapsed += Timer_Elapsed;
             timer.AutoReset = true;
             timer.Enabled = true;
-        }
-
-        private void GitMessagesCommand_Execute(object o) {
-            TimeTracker tt = o as TimeTracker;
-            if (tt == null) {
-                return;
-            }
-
-            DateTime start = tt.Time;
-            DateTime stop = TimeTrackers.SkipWhile(t => t != tt).Skip(1).FirstOrDefault()?.Time ?? DateTime.Now;
-            IEnumerable<string> messages =
-                from p in Settings.Default.GitPaths
-                where Directory.Exists(p)
-                let g = new Repository(p)
-                from c in g.Commits.QueryBy(new CommitFilter() { Since = g.Refs, SortBy = CommitSortStrategies.Time })
-                    .SkipWhile(c => c.Author.When > stop)
-                    .TakeWhile(c => c.Author.When > start)
-                where c.Author.Email == Settings.Default.AuthorEmail
-                where c.Parents.Count() == 1
-                select $"- {c.Message}".Trim();
-
-            _logger.Warn(JsonConvert.SerializeObject(new {
-                Message = "Invalid paths found",
-                Paths =
-                    from p in Settings.Default.GitPaths
-                    where !Directory.Exists(p)
-                    select p
-            }));
-
-            List<string> notes = new List<string>((tt.Notes ?? String.Empty).Split('\r', '\n'));
-            notes.AddRange(messages);
-            tt.Notes = String.Join(Environment.NewLine, notes.Select(n => n.Trim()).Where(s => !String.IsNullOrWhiteSpace(s)).Distinct()).Trim();
         }
 
         private void RemoveCommand_Execute(object o) {
@@ -199,7 +167,7 @@ namespace TimeTrackers {
             FinalTrackers.Clear();
             TotalTime = new TimeSpan();
 
-            IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.Notes));
+            IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.AllNotes));
             List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
             for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
                 // Stop processing on the EOD time tracker
@@ -221,7 +189,7 @@ namespace TimeTrackers {
                 FinalTrackers.Add(new FinalTracker() {
                     Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
                     Group = tg.Key,
-                    Notes = String.Join(Environment.NewLine, tg.Select(t => t.Notes))
+                    Notes = String.Join(Environment.NewLine, tg.Select(t => t.AllNotes))
                 });
             }
 
