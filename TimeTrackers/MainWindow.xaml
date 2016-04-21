@@ -52,7 +52,7 @@
                                             <ColumnDefinition Width="400px" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Grid.Column="0" Text="{Binding UserNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
-                                        <TextBox Grid.Column="1" Text="{Binding GitNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" />
+                                        <TextBox Grid.Column="1" Text="{Binding GitNotes, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
                                     </Grid>
                                 </DockPanel>
                             </DataTemplate>
