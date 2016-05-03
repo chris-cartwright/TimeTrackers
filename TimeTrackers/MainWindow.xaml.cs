@@ -84,7 +84,7 @@ namespace TimeTrackers {
             // Loop backwards over time trackers to calculate time ranges
             DateTime finishTime = DateTime.Now.AddHours(12);
             foreach (var tt in ViewModel.Instance.TimeTrackersByDay.Cast<ViewModel.TimeTracker>().Reverse()) {
-                tt.GitNotes = String.Join(Environment.NewLine, from m in messages where m.When > tt.Time && m.When <= finishTime select $"- {m.Message}".Trim());
+                tt.GitNotes = String.Join(Environment.NewLine, (from m in messages where m.When > tt.Time && m.When <= finishTime select $"- {m.Message}".Trim()).Distinct());
                 finishTime = tt.Time;
             }
         }
