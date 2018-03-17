@@ -4,215 +4,328 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows;
 using System.Windows.Data;
 using Newtonsoft.Json;
-using PostSharp;
-using PostSharp.Patterns.Model;
+using TimeTrackers.Annotations;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
 
 namespace TimeTrackers {
-    [NotifyPropertyChanged]
-    public class ViewModel {
-        public static string AutosaveFile { get; } = Path.Combine(Directory.GetCurrentDirectory(), "TimeTrackers.autosave.json");
+	public class ViewModel : INotifyPropertyChanged {
+		private string _message;
+		private TimeSpan _totalTime;
+		private DateTime _filterDay;
+		private DateTime _smallestSaved;
+		public static string AutosaveFile { get; } = Path.Combine(Directory.GetCurrentDirectory(), "TimeTrackers.autosave.json");
 
-        public static ViewModel Instance { get; }
+		public static ViewModel Instance { get; }
 
-        static ViewModel() {
-            Instance = new ViewModel();
-        }
+		static ViewModel() {
+			Instance = new ViewModel();
+		}
 
-        private class DifferenceTimeTracker : TimeTracker {
-            public TimeSpan Difference { get; }
+		private class DifferenceTimeTracker : TimeTracker {
+			public TimeSpan Difference { get; }
 
-            public DifferenceTimeTracker(TimeTracker tt, TimeSpan difference) {
-                Difference = difference;
-                Time = tt.Time;
-                Group = tt.Group;
-                UserNotes = tt.UserNotes;
-                GitNotes = tt.GitNotes;
-                Type = tt.Type;
-            }
-        }
+			public DifferenceTimeTracker(TimeTracker tt, TimeSpan difference) {
+				Difference = difference;
+				Time = tt.Time;
+				Group = tt.Group;
+				UserNotes = tt.UserNotes;
+				GitNotes = tt.GitNotes;
+				Type = tt.Type;
+			}
+		}
 
-        public enum TimeTrackerType {
-            Normal,
-            Lunch,
-            EndOfDay
-        };
+		public enum TimeTrackerType {
+			Normal,
+			Lunch,
+			EndOfDay
+		};
+		
+		public class TimeTracker : IComparable<TimeTracker>, INotifyPropertyChanged {
+			private DateTime _time;
+			private string _group;
+			private string _userNotes;
+			private string _gitNotes;
+			private TimeTrackerType _type;
 
-        [NotifyPropertyChanged]
-        public class TimeTracker : IComparable<TimeTracker> {
-            public DateTime Time { get; set; }
-            public string Group { get; set; }
-            public string UserNotes { get; set; }
-            public string GitNotes { get; set; }
-            public TimeTrackerType Type { get; set; }
+			public DateTime Time
+			{
+				get => _time;
+				set
+				{
+					if (value.Equals(_time)) return;
+					_time = value;
+					OnPropertyChanged1();
+				}
+			}
 
-            [JsonIgnore]
-            [SafeForDependencyAnalysis]
-            public string AllNotes => (UserNotes + Environment.NewLine + GitNotes).Trim();
+			public string Group
+			{
+				get => _group;
+				set
+				{
+					if (value == _group) return;
+					_group = value;
+					OnPropertyChanged1();
+				}
+			}
 
-            public TimeTracker() {
-                Time = Helpers.RoundToNearestInterval(DateTime.Now, new TimeSpan(0, 15, 0));
-                Type = TimeTrackerType.Normal;
-            }
+			public string UserNotes
+			{
+				get => _userNotes;
+				set
+				{
+					if (value == _userNotes) return;
+					_userNotes = value;
+					OnPropertyChanged1();
+					OnPropertyChanged1(nameof(AllNotes));
+				}
+			}
 
-            public int CompareTo(TimeTracker other) {
-                return Comparer<DateTime>.Default.Compare(Time, other.Time);
-            }
-        }
+			public string GitNotes
+			{
+				get => _gitNotes;
+				set
+				{
+					if (value == _gitNotes) return;
+					_gitNotes = value;
+					OnPropertyChanged1();
+					OnPropertyChanged1(nameof(AllNotes));
+				}
+			}
 
-        public class FinalTracker {
-            public TimeSpan Time { get; set; }
-            public string Group { get; set; }
-            public string Notes { get; set; }
-        }
+			public TimeTrackerType Type
+			{
+				get => _type;
+				set
+				{
+					if (value == _type) return;
+					_type = value;
+					OnPropertyChanged1();
+				}
+			}
 
-        public ObservableCollection<TimeTracker> TimeTrackers { get; }
-        public ObservableCollection<FinalTracker> FinalTrackers { get; }
-        public ICollectionView TimeTrackersByDay { get; }
-        public string Message { get; set; }
-        public TimeSpan TotalTime { get; set; }
-        public DateTime FilterDay { get; set; }
-        public DateTime SmallestSaved { get; set; }
+			[JsonIgnore]
+			public string AllNotes => (UserNotes + Environment.NewLine + GitNotes).Trim();
 
-        public RelayCommand RemoveCommand { get; }
+			public TimeTracker() {
+				Time = Helpers.RoundToNearestInterval(DateTime.Now, new TimeSpan(0, 15, 0));
+				Type = TimeTrackerType.Normal;
+			}
 
-        private bool FilterByDay(object obj) {
-            TimeTracker tt = obj as TimeTracker;
-            if (tt == null) {
-                throw new ArgumentException("Object is not a time tracker", nameof(obj));
-            }
+			public int CompareTo(TimeTracker other) {
+				return Comparer<DateTime>.Default.Compare(Time, other.Time);
+			}
 
-            return tt.Time.Date == FilterDay.Date;
-        }
+			public event PropertyChangedEventHandler PropertyChanged;
 
-        private ViewModel() {
-            TimeTrackers = new ObservableCollection<TimeTracker>();
-            FinalTrackers = new ObservableCollection<FinalTracker>();
-            FilterDay = DateTime.Now;
+			[NotifyPropertyChangedInvocator]
+			protected virtual void OnPropertyChanged1([CallerMemberName] string propertyName = null)
+			{
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
 
-            TimeTrackersByDay = CollectionViewSource.GetDefaultView(TimeTrackers);
-            TimeTrackersByDay.Filter = FilterByDay;
-            INotifyPropertyChanged propChanged = Post.Cast<ViewModel, INotifyPropertyChanged>(this);
-            propChanged.PropertyChanged += (src, args) => {
-                if (args.PropertyName == nameof(FilterDay)) {
-                    Application.Current.Dispatcher.Invoke(TimeTrackersByDay.Refresh);
-                }
-            };
+		public class FinalTracker {
+			public TimeSpan Time { get; set; }
+			public string Group { get; set; }
+			public string Notes { get; set; }
+		}
 
-            RemoveCommand = new RelayCommand(RemoveCommand_Execute);
+		public ObservableCollection<TimeTracker> TimeTrackers { get; }
+		public ObservableCollection<FinalTracker> FinalTrackers { get; }
+		public ICollectionView TimeTrackersByDay { get; }
 
-            if (File.Exists(AutosaveFile)) {
-                List<TimeTracker> tts = JsonConvert.DeserializeObject<List<TimeTracker>>(File.ReadAllText(AutosaveFile));
-                foreach (TimeTracker tt in tts) {
-                    TimeTrackers.Add(tt);
-                }
+		public string Message
+		{
+			get => _message;
+			set
+			{
+				if (value == _message) return;
+				_message = value;
+				OnPropertyChanged();
+			}
+		}
 
-                Message = "Timers loaded from cache";
-            }
+		public TimeSpan TotalTime
+		{
+			get => _totalTime;
+			set
+			{
+				if (value.Equals(_totalTime)) return;
+				_totalTime = value;
+				OnPropertyChanged();
+			}
+		}
 
-            if (TimeTrackers.All(t => t.Time.Date != DateTime.Now.Date)) {
-                TimeTrackers.Add(new TimeTracker());
-            }
+		public DateTime FilterDay
+		{
+			get => _filterDay;
+			set
+			{
+				if (value.Equals(_filterDay)) return;
+				_filterDay = value;
+				OnPropertyChanged();
+			}
+		}
 
-            SetSmallest();
+		public DateTime SmallestSaved
+		{
+			get => _smallestSaved;
+			set
+			{
+				if (value.Equals(_smallestSaved)) return;
+				_smallestSaved = value;
+				OnPropertyChanged();
+			}
+		}
 
-            TimeTrackers.CollectionChanged += (src, args) => {
-                Application.Current.Dispatcher.Invoke(SetSmallest);
-            };
+		public RelayCommand RemoveCommand { get; }
 
-            Timer timer = new Timer(30000);
-            timer.Elapsed += Timer_Elapsed;
-            timer.AutoReset = true;
-            timer.Enabled = true;
-        }
+		private bool FilterByDay(object obj) {
+			TimeTracker tt = obj as TimeTracker;
+			if (tt == null) {
+				throw new ArgumentException("Object is not a time tracker", nameof(obj));
+			}
 
-        private void RemoveCommand_Execute(object o) {
-            TimeTracker tt = o as TimeTracker;
-            if (tt != null) {
-                TimeTrackers.Remove(tt);
-            }
+			return tt.Time.Date == FilterDay.Date;
+		}
 
-            Watchable<string> gp = o as Watchable<string>;
-            if (gp != null) {
-                Settings.Default.GitPaths.Remove(gp);
-            }
-        }
+		private ViewModel() {
+			TimeTrackers = new ObservableCollection<TimeTracker>();
+			FinalTrackers = new ObservableCollection<FinalTracker>();
+			FilterDay = DateTime.Now;
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
-            SaveTimers();
-        }
+			TimeTrackersByDay = CollectionViewSource.GetDefaultView(TimeTrackers);
+			TimeTrackersByDay.Filter = FilterByDay;
+			PropertyChanged += (src, args) => {
+				if (args.PropertyName == nameof(FilterDay)) {
+					Application.Current.Dispatcher.Invoke(TimeTrackersByDay.Refresh);
+				}
+			};
 
-        private TimeSpan? ToHourMinute(DateTime? dateTime) {
-            if (dateTime == null) {
-                return null;
-            }
+			RemoveCommand = new RelayCommand(RemoveCommand_Execute);
 
-            return ToHourMinute((DateTime)dateTime);
-        }
+			if (File.Exists(AutosaveFile)) {
+				List<TimeTracker> tts = JsonConvert.DeserializeObject<List<TimeTracker>>(File.ReadAllText(AutosaveFile));
+				foreach (TimeTracker tt in tts) {
+					TimeTrackers.Add(tt);
+				}
 
-        private TimeSpan ToHourMinute(DateTime dateTime) {
-            return new TimeSpan(dateTime.TimeOfDay.Hours, dateTime.TimeOfDay.Minutes, 0);
-        }
+				Message = "Timers loaded from cache";
+			}
 
-        private void SetSmallest() {
-            SmallestSaved = (from tt in TimeTrackers let d = tt.Time orderby tt.Time select d).FirstOrDefault();
-        }
+			if (TimeTrackers.All(t => t.Time.Date != DateTime.Now.Date)) {
+				TimeTrackers.Add(new TimeTracker());
+			}
 
-        public void CalculateFinals() {
-            FinalTrackers.Clear();
-            TotalTime = new TimeSpan();
+			SetSmallest();
 
-            IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.AllNotes));
-            List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
-            for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
-                // Stop processing on the EOD time tracker
-                if (node.Value.Type == TimeTrackerType.EndOfDay) {
-                    break;
-                }
+			TimeTrackers.CollectionChanged += (src, args) => {
+				Application.Current.Dispatcher.Invoke(SetSmallest);
+			};
 
-                finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
-            }
+			Timer timer = new Timer(30000);
+			timer.Elapsed += Timer_Elapsed;
+			timer.AutoReset = true;
+			timer.Enabled = true;
+		}
 
-            IEnumerable<IGrouping<string, DifferenceTimeTracker>> groupedFinals =
-                from f in finals
-                where f.Type != TimeTrackerType.Lunch
-                group f by f.Group
-                into g
-                select g;
+		private void RemoveCommand_Execute(object o) {
+			TimeTracker tt = o as TimeTracker;
+			if (tt != null) {
+				TimeTrackers.Remove(tt);
+			}
 
-            foreach (IGrouping<string, DifferenceTimeTracker> tg in groupedFinals) {
-                FinalTrackers.Add(new FinalTracker() {
-                    Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
-                    Group = tg.Key,
-                    Notes = String.Join(Environment.NewLine, tg.Select(t => t.AllNotes))
-                });
-            }
+			Watchable<string> gp = o as Watchable<string>;
+			if (gp != null) {
+				Settings.Default.GitPaths.Remove(gp);
+			}
+		}
 
-            TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
-        }
+		private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
+			SaveTimers();
+		}
 
-        public void SaveTimers() {
-            DateTime[] toRemove = (
-                    from tt in TimeTrackersByDay.Cast<TimeTracker>()
-                    group tt by tt.Time.Date into g
-                    orderby g
-                    select g.Key.Date
-                )
-                .Skip(Settings.Default.DaysToKeep)
-                .ToArray();
+		private TimeSpan? ToHourMinute(DateTime? dateTime) {
+			if (dateTime == null) {
+				return null;
+			}
 
-            IEnumerable<TimeTracker> toSave =
-                from tt in TimeTrackers
-                where !toRemove.Contains(tt.Time.Date)
-                select tt;
+			return ToHourMinute((DateTime)dateTime);
+		}
 
-            File.WriteAllText(AutosaveFile, JsonConvert.SerializeObject(toSave));
-            Message = $"Timers saved to cache at {DateTime.Now}";
-        }
-    }
+		private TimeSpan ToHourMinute(DateTime dateTime) {
+			return new TimeSpan(dateTime.TimeOfDay.Hours, dateTime.TimeOfDay.Minutes, 0);
+		}
+
+		private void SetSmallest() {
+			SmallestSaved = (from tt in TimeTrackers let d = tt.Time orderby tt.Time select d).FirstOrDefault();
+		}
+
+		public void CalculateFinals() {
+			FinalTrackers.Clear();
+			TotalTime = new TimeSpan();
+
+			IEnumerable<TimeTracker> tts = TimeTrackersByDay.Cast<TimeTracker>().Where(t => !String.IsNullOrWhiteSpace(t.AllNotes));
+			List<DifferenceTimeTracker> finals = new List<DifferenceTimeTracker>();
+			for (LinkedListNode<TimeTracker> node = new LinkedList<TimeTracker>(tts).First; node != null; node = node.Next) {
+				// Stop processing on the EOD time tracker
+				if (node.Value.Type == TimeTrackerType.EndOfDay) {
+					break;
+				}
+
+				finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
+			}
+
+			IEnumerable<IGrouping<string, DifferenceTimeTracker>> groupedFinals =
+				from f in finals
+				where f.Type != TimeTrackerType.Lunch
+				group f by f.Group
+				into g
+				select g;
+
+			foreach (IGrouping<string, DifferenceTimeTracker> tg in groupedFinals) {
+				FinalTrackers.Add(new FinalTracker() {
+					Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
+					Group = tg.Key,
+					Notes = String.Join(Environment.NewLine, tg.Select(t => t.AllNotes))
+				});
+			}
+
+			TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
+		}
+
+		public void SaveTimers() {
+			DateTime[] toRemove = (
+					from tt in TimeTrackersByDay.Cast<TimeTracker>()
+					group tt by tt.Time.Date into g
+					orderby g
+					select g.Key.Date
+				)
+				.Skip(Settings.Default.DaysToKeep)
+				.ToArray();
+
+			IEnumerable<TimeTracker> toSave =
+				from tt in TimeTrackers
+				where !toRemove.Contains(tt.Time.Date)
+				select tt;
+
+			File.WriteAllText(AutosaveFile, JsonConvert.SerializeObject(toSave));
+			Message = $"Timers saved to cache at {DateTime.Now}";
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		[NotifyPropertyChangedInvocator]
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+	}
 }
