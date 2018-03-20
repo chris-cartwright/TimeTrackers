@@ -3,7 +3,6 @@ using System.Threading;
 using System.Windows;
 using log4net;
 using log4net.Appender;
-using log4net.Repository;
 
 namespace TimeTrackers {
     /// <summary>
@@ -27,8 +26,8 @@ namespace TimeTrackers {
         }
 
         public void FlushBuffers() {
-            ILoggerRepository rep = LogManager.GetRepository();
-            foreach (IAppender appender in rep.GetAppenders()) {
+            var rep = LogManager.GetRepository();
+            foreach (var appender in rep.GetAppenders()) {
                 (appender as BufferingAppenderSkeleton)?.Flush();
             }
         }
@@ -62,7 +61,7 @@ namespace TimeTrackers {
 
             log4net.Config.XmlConfigurator.Configure();
 
-            App app = new App();
+            var app = new App();
             _mainWindow = new MainWindow();
 
             _foregroundListenerThread = new Thread(ForegroundListener);

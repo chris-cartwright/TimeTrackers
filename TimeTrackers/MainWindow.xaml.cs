@@ -10,35 +10,39 @@ using LibGit2Sharp;
 using Newtonsoft.Json;
 using TimeTrackers.Properties;
 
-namespace TimeTrackers {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow {
+namespace TimeTrackers
+{
+    public partial class MainWindow
+    {
         private readonly ILog _logger = LogManager.GetLogger(typeof(MainWindow));
 
-        public MainWindow() {
+        public MainWindow()
+        {
             InitializeComponent();
 
             DataContext = ViewModel.Instance;
         }
 
-        private void AddTimeTracker_Click(object sender, RoutedEventArgs e) {
+        private void AddTimeTracker_Click(object sender, RoutedEventArgs e)
+        {
             ViewModel.Instance.TimeTrackers.Add(new ViewModel.TimeTracker());
         }
 
-        private void Finals_OnGotFocus(object sender, RoutedEventArgs e) {
+        private void Finals_OnGotFocus(object sender, RoutedEventArgs e)
+        {
             ViewModel.Instance.CalculateFinals();
         }
 
-        protected override void OnClosing(CancelEventArgs e) {
+        protected override void OnClosing(CancelEventArgs e)
+        {
             ViewModel.Instance.SaveTimers();
             Settings.Default.Save();
         }
 
-        private void FinalNotes_OnGotFocus(object sender, RoutedEventArgs e) {
-            TextBox tb = sender as TextBox;
-            if (tb == null) {
+        private void FinalNotes_OnGotFocus(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is TextBox tb))
+            {
                 return;
             }
 
@@ -48,20 +52,25 @@ namespace TimeTrackers {
             Clipboard.SetText(tb.Text);
         }
 
-        private void Arrange_Click(object sender, RoutedEventArgs e) {
+        private void Arrange_Click(object sender, RoutedEventArgs e)
+        {
             ViewModel.Instance.TimeTrackers.BubbleSort();
         }
 
-        private void AddGitPath_Click(object sender, RoutedEventArgs e) {
-            if (Settings.Default.GitPaths == null) {
+        private void AddGitPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (Settings.Default.GitPaths == null)
+            {
                 Settings.Default.GitPaths = new ObservableCollection<Watchable<string>>();
             }
 
-            Settings.Default.GitPaths.Add(new Watchable<string>(String.Empty));
+            Settings.Default.GitPaths.Add(new Watchable<string>(string.Empty));
         }
 
-        private void GetGitMessages_Click(object sender, RoutedEventArgs e) {
-            _logger.Warn(JsonConvert.SerializeObject(new {
+        private void GetGitMessages_Click(object sender, RoutedEventArgs e)
+        {
+            _logger.Warn(JsonConvert.SerializeObject(new
+            {
                 Message = "Invalid paths found",
                 Paths =
                     from p in Settings.Default.GitPaths
@@ -82,9 +91,10 @@ namespace TimeTrackers {
             ).ToArray();
 
             // Loop backwards over time trackers to calculate time ranges
-            DateTime finishTime = DateTime.Now.AddHours(12);
-            foreach (var tt in ViewModel.Instance.TimeTrackersByDay.Cast<ViewModel.TimeTracker>().Reverse()) {
-                tt.GitNotes = String.Join(Environment.NewLine, (from m in messages where m.When > tt.Time && m.When <= finishTime select $"- {m.Message}".Trim()).Distinct());
+            var finishTime = DateTime.Now.AddHours(12);
+            foreach (var tt in ViewModel.Instance.TimeTrackersByDay.Cast<ViewModel.TimeTracker>().Reverse())
+            {
+                tt.GitNotes = string.Join(Environment.NewLine, (from m in messages where m.When > tt.Time && m.When <= finishTime select $"- {m.Message}".Trim()).Distinct());
                 finishTime = tt.Time;
             }
         }
