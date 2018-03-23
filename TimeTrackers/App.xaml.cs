@@ -5,9 +5,6 @@ using log4net;
 using log4net.Appender;
 
 namespace TimeTrackers {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App {
         private static readonly Mutex Mutex = new Mutex(true, "{36513326-FA2D-4005-A042-26B1DF37EAFB}");
         private static readonly EventWaitHandle ShowApp = new EventWaitHandle(false, EventResetMode.AutoReset, "{3439C7F4-CABA-4528-9ABC-9DDC6FDEACCE}");

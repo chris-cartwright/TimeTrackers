@@ -82,7 +82,7 @@ namespace TimeTrackers
                 from p in Settings.Default.GitPaths
                 where Directory.Exists(p)
                 let g = new Repository(p)
-                from c in g.Commits.QueryBy(new CommitFilter { Since = g.Refs, SortBy = CommitSortStrategies.Time })
+                from c in g.Commits.QueryBy(new CommitFilter { IncludeReachableFrom = g.Refs, SortBy = CommitSortStrategies.Time })
                     .SkipWhile(c => c.Author.When > ViewModel.Instance.FilterDay.Date + TimeSpan.FromDays(1))
                     .TakeWhile(c => c.Author.When > ViewModel.Instance.FilterDay.Date)
                 where c.Author.Email == Settings.Default.AuthorEmail
@@ -94,6 +94,7 @@ namespace TimeTrackers
             var finishTime = DateTime.Now.AddHours(12);
             foreach (var tt in ViewModel.Instance.TimeTrackersByDay.Cast<ViewModel.TimeTracker>().Reverse())
             {
+                // ReSharper disable once AccessToModifiedClosure
                 tt.GitNotes = string.Join(Environment.NewLine, (from m in messages where m.When > tt.Time && m.When <= finishTime select $"- {m.Message}".Trim()).Distinct());
                 finishTime = tt.Time;
             }

@@ -44,7 +44,7 @@
                                     <xctk:TimePicker Width="100px" DockPanel.Dock="Left" Value="{Binding Time}" />
                                     <DatePicker Width="100px" DockPanel.Dock="Left" SelectedDate="{Binding Time}" DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" Visibility="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate, Converter={StaticResource BoolToVis}}" />
                                     <ComboBox Width="90px" DockPanel.Dock="Left" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
-                                    <TextBox Width="60px" DockPanel.Dock="Left" Text="{Binding Group}" />
+                                    <TextBox Width="100px" DockPanel.Dock="Left" Text="{Binding Group}" />
                                     <Button Width="30px" DockPanel.Dock="Right" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -92,7 +92,7 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="100" />
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Height="20" VerticalAlignment="Top" IsReadOnly="True">
