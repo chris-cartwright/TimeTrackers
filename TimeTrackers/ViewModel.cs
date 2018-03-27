@@ -323,7 +323,11 @@ namespace TimeTrackers
                 {
                     Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
                     Group = tg.Key,
-                    Notes = string.Join(Environment.NewLine, tg.Select(t => t.AllNotes))
+                    Notes = string.Join(Environment.NewLine,
+                        from n in tg
+                        where n.AllNotes.Length > 2
+                        select n.AllNotes.Replace($"{tg.Key}: ", "")
+                    )
                 });
             }
 
