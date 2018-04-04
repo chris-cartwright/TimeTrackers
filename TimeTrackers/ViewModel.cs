@@ -17,6 +17,14 @@ namespace TimeTrackers
 {
     public class ViewModel : INotifyPropertyChanged
     {
+        public Tuple<string, string>[] InternalIssues => new[]
+        {
+            new Tuple<string, string>("INT-5", "SME"),
+            new Tuple<string, string>("INT-8", "Team Building"),
+            new Tuple<string, string>("INT-23", "Holiday"),
+            new Tuple<string, string>("INT-19", "Scrum")
+        };
+
         private string _message;
         private TimeSpan _totalTime;
         private DateTime _filterDay;

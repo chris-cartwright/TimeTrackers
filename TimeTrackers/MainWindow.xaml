@@ -18,6 +18,25 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="#DDD" />
+        <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
+
+        <ControlTemplate x:Key="FullDescriptionTemplate" TargetType="ComboBoxItem">
+            <Border Name="Border" Padding="2" SnapsToDevicePixels="true">
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Item2}"/>
+                </StackPanel>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBackgroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
     </Window.Resources>
     <DockPanel Margin="6">
         <StatusBar DockPanel.Dock="Bottom">
@@ -44,7 +63,18 @@
                                     <xctk:TimePicker Width="100px" DockPanel.Dock="Left" Value="{Binding Time}" />
                                     <DatePicker Width="100px" DockPanel.Dock="Left" SelectedDate="{Binding Time}" DisplayDateEnd="{Binding Source={x:Static System:DateTime.Now}, Mode=OneWay}" Visibility="{Binding Source={x:Static properties:Settings.Default}, Path=ShowEntryDate, Converter={StaticResource BoolToVis}}" />
                                     <ComboBox Width="90px" DockPanel.Dock="Left" SelectedItem="{Binding Type}" ItemsSource="{Binding Source={StaticResource TimeTrackerTypeProvider}}" />
-                                    <TextBox Width="100px" DockPanel.Dock="Left" Text="{Binding Group}" />
+                                    <ComboBox IsEditable="True" Width="100px" DockPanel.Dock="Left" Text="{Binding Group}" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.InternalIssues}" DisplayMemberPath="Item1">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Item1}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ComboBoxItem}">
+                                                <Setter Property="Template" Value="{StaticResource FullDescriptionTemplate}" />
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
                                     <Button Width="30px" DockPanel.Dock="Right" Content="X" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
