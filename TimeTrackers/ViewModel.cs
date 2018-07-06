@@ -5,9 +5,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Data;
+using Atlassian.Jira;
+using log4net;
 using Newtonsoft.Json;
 using TimeTrackers.Annotations;
 using TimeTrackers.Properties;
@@ -17,18 +20,22 @@ namespace TimeTrackers
 {
     public class ViewModel : INotifyPropertyChanged
     {
+        private readonly ILog _logger = LogManager.GetLogger(typeof(ViewModel));
+
         public Tuple<string, string>[] InternalIssues => new[]
         {
-            new Tuple<string, string>("INT-5", "SME"),
-            new Tuple<string, string>("INT-8", "Team Building"),
-            new Tuple<string, string>("INT-23", "Holiday"),
-            new Tuple<string, string>("INT-19", "Scrum")
+            new Tuple<string, string>("INT-30", "SME"),
+            new Tuple<string, string>("INT-31", "Team Building"),
+            new Tuple<string, string>("INT-37", "Holiday"),
+            new Tuple<string, string>("INT-34", "Scrum")
         };
 
         private string _message;
         private TimeSpan _totalTime;
         private DateTime _filterDay;
         private DateTime _smallestSaved;
+        private Jira _jira;
+
         public static string AutosaveFile { get; } = Path.Combine(Directory.GetCurrentDirectory(), "TimeTrackers.autosave.json");
 
         public static ViewModel Instance { get; }
@@ -153,6 +160,7 @@ namespace TimeTrackers
             public TimeSpan Time { get; set; }
             public string Group { get; set; }
             public string Notes { get; set; }
+            public IReadOnlyCollection<string> DevTask { get; set; }
         }
 
         public ObservableCollection<TimeTracker> TimeTrackers { get; }
@@ -300,7 +308,7 @@ namespace TimeTrackers
             SmallestSaved = (from tt in TimeTrackers let d = tt.Time orderby tt.Time select d).FirstOrDefault();
         }
 
-        public void CalculateFinals()
+        public async Task CalculateFinalsAsync()
         {
             FinalTrackers.Clear();
             TotalTime = new TimeSpan();
@@ -318,6 +326,8 @@ namespace TimeTrackers
                 finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
             }
 
+            LoadJira();
+
             var groupedFinals =
                 from f in finals
                 where f.Type != TimeTrackerType.Lunch
@@ -327,7 +337,7 @@ namespace TimeTrackers
 
             foreach (var tg in groupedFinals)
             {
-                FinalTrackers.Add(new FinalTracker()
+                FinalTrackers.Add(new FinalTracker
                 {
                     Time = new TimeSpan(tg.Sum(t => t.Difference.Ticks)),
                     Group = tg.Key,
@@ -335,11 +345,68 @@ namespace TimeTrackers
                         from n in tg
                         where n.AllNotes.Length > 2
                         select n.AllNotes.Replace($"{tg.Key}: ", "")
-                    )
+                    ),
+                    DevTask = await GetDevSubtasksAsync(tg.Key)
                 });
             }
 
             TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
+        }
+
+        private void LoadJira()
+        {
+            if (_jira != null)
+            {
+                return;
+            }
+
+            var prompt = new PasswordPrompt();
+            if (prompt.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                _jira = Jira.CreateRestClient(
+                    Settings.Default.JiraUrl,
+                    Settings.Default.JiraUser,
+                    prompt.Password
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to log in to JIRA", ex);
+                MessageBox.Show(
+                    "Could not log in to JIRA",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+
+        public async Task<List<string>> GetDevSubtasksAsync(string key)
+        {
+            try
+            {
+                var issue = await _jira.Issues.GetIssueAsync(key);
+                if (issue == null)
+                {
+                    return null;
+                }
+
+                return (
+                    from s in await issue.GetSubTasksAsync(5)
+                    where s.Type == "Development"
+                    select $"{s.Key.Value} - {s.Summary}"
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Could not get dev subtask", ex);
+                return null;
+            }
         }
 
         public void SaveTimers()

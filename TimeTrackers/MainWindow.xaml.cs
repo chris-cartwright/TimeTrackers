@@ -28,9 +28,9 @@ namespace TimeTrackers
             ViewModel.Instance.TimeTrackers.Add(new ViewModel.TimeTracker());
         }
 
-        private void Finals_OnGotFocus(object sender, RoutedEventArgs e)
+        private async void Finals_OnGotFocus(object sender, RoutedEventArgs e)
         {
-            ViewModel.Instance.CalculateFinals();
+            await ViewModel.Instance.CalculateFinalsAsync();
         }
 
         protected override void OnClosing(CancelEventArgs e)

@@ -2,17 +2,23 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TimeTrackers.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="AuthorEmail" Type="System.String" Scope="User">
-      <Value Profile="(Default)">chris.cartwright@dei.ca</Value>
-    </Setting>
-    <Setting Name="DaysToKeep" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
-    </Setting>
     <Setting Name="GitPaths" Type="System.Collections.ObjectModel.ObservableCollection&lt;Watchable&lt;string&gt;&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ShowEntryDate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="AuthorEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ccartwright@lwolf.com</Value>
+    </Setting>
+    <Setting Name="DaysToKeep" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">31</Value>
+    </Setting>
+    <Setting Name="JiraUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://jiraweb.lwolf.com:8443/</Value>
+    </Setting>
+    <Setting Name="JiraUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ccartwright</Value>
     </Setting>
   </Settings>
 </SettingsFile>
