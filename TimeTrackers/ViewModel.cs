@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Timers;
@@ -12,6 +13,8 @@ using System.Windows.Data;
 using Atlassian.Jira;
 using log4net;
 using Newtonsoft.Json;
+using Polly;
+using Polly.Caching.MemoryCache;
 using TimeTrackers.Annotations;
 using TimeTrackers.Properties;
 using TimeTrackers.View.ViewModel;
@@ -21,6 +24,7 @@ namespace TimeTrackers
     public class ViewModel : INotifyPropertyChanged
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(ViewModel));
+        private readonly Policy _subTaskCachePolicy;
 
         public Tuple<string, string>[] InternalIssues => new[]
         {
@@ -268,6 +272,9 @@ namespace TimeTrackers
             timer.Elapsed += Timer_Elapsed;
             timer.AutoReset = true;
             timer.Enabled = true;
+
+            var provider = new MemoryCacheProvider(MemoryCache.Default);
+            _subTaskCachePolicy = Policy.CacheAsync(provider, TimeSpan.FromHours(1));
         }
 
         private void RemoveCommand_Execute(object o)
@@ -326,7 +333,7 @@ namespace TimeTrackers
                 finals.Add(new DifferenceTimeTracker(node.Value, (ToHourMinute(node.Next?.Value?.Time) ?? ToHourMinute(DateTime.Now)) - ToHourMinute(node.Value.Time)));
             }
 
-            LoadJira();
+            await LoadJiraAsync();
 
             var groupedFinals =
                 from f in finals
@@ -353,26 +360,35 @@ namespace TimeTrackers
             TotalTime = new TimeSpan(FinalTrackers.Sum(t => t.Time.Ticks));
         }
 
-        private void LoadJira()
+        private async Task LoadJiraAsync()
         {
             if (_jira != null)
             {
                 return;
             }
 
-            var prompt = new PasswordPrompt();
-            if (prompt.ShowDialog() != true)
-            {
-                return;
-            }
-
             try
             {
-                _jira = Jira.CreateRestClient(
-                    Settings.Default.JiraUrl,
-                    Settings.Default.JiraUser,
-                    prompt.Password
-                );
+                await Policy
+                    .Handle<Exception>()
+                    .RetryAsync(3)
+                    .ExecuteAsync(async () =>
+                    {
+                        var prompt = new PasswordPrompt();
+                        if (prompt.ShowDialog() != true)
+                        {
+                            return;
+                        }
+
+                        _jira = Jira.CreateRestClient(
+                            Settings.Default.JiraUrl,
+                            Settings.Default.JiraUser,
+                            prompt.Password
+                        );
+
+                        // Need to call something to test credentials
+                        await _jira.Statuses.GetStatusesAsync();
+                    });
             }
             catch (Exception ex)
             {
@@ -388,25 +404,28 @@ namespace TimeTrackers
 
         public async Task<List<string>> GetDevSubtasksAsync(string key)
         {
-            try
+            return await _subTaskCachePolicy.ExecuteAsync(async () =>
             {
-                var issue = await _jira.Issues.GetIssueAsync(key);
-                if (issue == null)
+                try
                 {
+                    var issue = await _jira.Issues.GetIssueAsync(key);
+                    if (issue == null)
+                    {
+                        return null;
+                    }
+
+                    return (
+                        from s in await issue.GetSubTasksAsync(5)
+                        where s.Type == "Development"
+                        select $"{s.Key.Value} - {s.Summary}"
+                    ).ToList();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("Could not get dev subtask", ex);
                     return null;
                 }
-
-                return (
-                    from s in await issue.GetSubTasksAsync(5)
-                    where s.Type == "Development"
-                    select $"{s.Key.Value} - {s.Summary}"
-                ).ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Could not get dev subtask", ex);
-                return null;
-            }
+            });
         }
 
         public void SaveTimers()
