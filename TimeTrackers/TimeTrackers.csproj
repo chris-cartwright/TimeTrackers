@@ -42,8 +42,8 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Atlassian.Jira, Version=10.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Atlassian.SDK.10.3.0\lib\net452\Atlassian.Jira.dll</HintPath>
+    <Reference Include="Atlassian.Jira, Version=10.3.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Atlassian.SDK.10.3.2\lib\net452\Atlassian.Jira.dll</HintPath>
     </Reference>
     <Reference Include="LibGit2Sharp, Version=0.25.0.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
       <HintPath>..\packages\LibGit2Sharp.0.25.2\lib\netstandard2.0\LibGit2Sharp.dll</HintPath>
